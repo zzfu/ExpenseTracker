@@ -1,0 +1,23 @@
+- Rent
+-- Rent
+-- Utility/Electricity
+-- Utility/Internet
+-- Other
+- Grocery
+-- WholeFoods
+-- Costco
+-- Yami
+-- Asian Market
+-- Other
+- Transportation
+-- Uber/Lyft
+-- Airplane
+-- Metro/Bus
+-- Car Rental
+-- Other
+- Delivery
+-- Delivery
+-- Other
+- Shopping
+-- Shopping
+-- Other
