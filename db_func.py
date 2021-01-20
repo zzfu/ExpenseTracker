@@ -1,8 +1,18 @@
 import sqlite3
 from config import *
 
-CONN = sqlite3.connect(DB_FILE)
+CONN = sqlite3.connect(DB_FILE, check_same_thread=False)  # not thread safe!
 C = CONN.cursor()
+
+person_cols = ['person_id', 'name']
+category_level1_cols = ['category_id', 'category_name']
+category_level2_cols = ['category_id', 'category_name', 'parent_id']
+expense_cols = ['record_id', 'date', 'category_level1_id',
+                'category_level2_id', 'person_id', 'amount', 'note']
+
+
+def to_dict(query_result, columns):
+    return [dict(zip(columns, qr)) for qr in query_result]
 
 
 # persons table
@@ -12,7 +22,7 @@ def get_person(person_id: int) -> list[tuple[int, str]]:
     else:
         C.execute(
             'SELECT person_id, name FROM persons WHERE person_id=? AND deleted=0', (person_id,))
-    return C.fetchall()
+    return to_dict(C.fetchall(), person_cols)
 
 
 def modify_person(person_id: int, name: str):
@@ -39,7 +49,7 @@ def get_category_level1(category_id: int) -> list[tuple[int, str]]:
     else:
         C.execute(
             'SELECT category_id, category_name FROM categories_level1 WHERE category_id=? AND deleted=0', (category_id,))
-    return C.fetchall()
+    return to_dict(C.fetchall(), category_level1_cols)
 
 
 def modify_category_level1(category_id: int, category_name: str):
@@ -68,7 +78,7 @@ def get_category_level2(category_id: int) -> list[tuple[int, str, int]]:
     else:
         C.execute(
             'SELECT category_id, category_name, parent_id FROM categories_level2 WHERE category_id=? AND deleted=0', (category_id,))
-    return C.fetchall()
+    return to_dict(C.fetchall(), category_level2_cols)
 
 
 def modify_category_level2(category_id: int, category_name: str, parent_id: int):
@@ -90,21 +100,32 @@ def new_category_level2(category_name: str, parent_id: int):
 
 
 # get all categories
-def get_all_categories() -> dict[str, list[str]]:
+def get_all_categories() -> dict[tuple[int, str], list[tuple[int, str]]]:
     C.execute('''
-        SELECT c1.category_name, c2.category_name
+        SELECT c1.category_id, c1.category_name, c2.category_id, c2.category_name
         FROM categories_level2 AS c2
         LEFT JOIN categories_level1 AS c1
         ON c2.parent_id=c1.category_id
         WHERE c1.deleted=0 and c2.deleted=0
     ''')
-    categories = {}
     query_result = C.fetchall()
-    for level1_name, level2_name in query_result:
-        if level1_name in categories:
-            categories[level1_name].append(level2_name)
+    level1_names, children = {}, {}
+    for level1_id, level1_name, level2_id, level2_name in query_result:
+        if level1_id not in level1_names:
+            level1_names[level1_id] = level1_name
+        if level1_id in children:
+            children[level1_id].append(
+                {'level2_id': level2_id, 'level2_name': level2_name})
         else:
-            categories[level1_name] = [level2_name]
+            children[level1_id] = [
+                {'level2_id': level2_id, 'level2_name': level2_name}]
+    categories = []
+    for level1_id in level1_names:
+        categories.append({
+            "level1_id": level1_id,
+            "level1_name": level1_names[level1_id],
+            "level2_children": children[level1_id]
+        })
     return categories
 
 
@@ -115,7 +136,7 @@ def get_expense(record_id: int) -> list[tuple[int, str, int, int, int, float, st
     else:
         C.execute(
             'SELECT record_id, date, category_level1_id, category_level2_id, person_id, amount, note FROM expenses WHERE record_id=? AND deleted=0', (record_id,))
-    return C.fetchall()
+    return to_dict(C.fetchall(), expense_cols)
 
 
 def modify_expense(
