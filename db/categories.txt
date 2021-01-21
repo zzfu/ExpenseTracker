@@ -2,6 +2,9 @@
 -- Rent
 -- Utility/Electricity
 -- Utility/Internet
+-- Insurance
+-- Moving
+-- Storage
 -- Other
 - Grocery
 -- WholeFoods
@@ -19,5 +22,13 @@
 -- Delivery
 -- Other
 - Shopping
--- Shopping
+-- Electronic
+-- Book
+-- Other
+- Subscription
+-- Amazon Prime
+-- Other
+- Entertainment
+-- Dining
+-- Game
 -- Other
