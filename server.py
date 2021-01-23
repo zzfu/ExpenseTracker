@@ -1,6 +1,10 @@
 from flask import Flask, request, jsonify
 from db_func import *
+from flask_cors import CORS, cross_origin
+
+
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 @app.route('/api/person/', methods=['GET', 'POST'])
@@ -88,3 +92,7 @@ def expense(record_id: int = None):
     elif request.method == 'DELETE':
         delete_expense(record_id)
         return 'Success'
+
+
+if __name__ == '__main__':
+    app.run(port=5000)

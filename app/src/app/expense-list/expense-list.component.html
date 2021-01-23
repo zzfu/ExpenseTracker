@@ -1,0 +1,20 @@
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Category</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Person</th>
+            <th scope="col">Note</th>
+        </tr>
+    </thead>
+    <tbody *ngFor="let expense of expenses | async">
+        <tr>
+            <td>{{ expense.date }}</td>
+            <td>{{ expense.category_level1_id + ' - ' + expense.category_level2_id }}</td>
+            <td>{{ expense.amount }}</td>
+            <td>{{ expense.person_id }}</td>
+            <td>{{ expense.note }}</td>
+        </tr>
+    </tbody>
+</table>
